@@ -995,6 +995,7 @@ ngx_http_proxy_handler(ngx_http_request_t *r)
     u->conf = &plcf->upstream;
 
 #if (NGX_HTTP_CACHE)
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "NGX_HTTP_CACHE is on");
     pmcf = ngx_http_get_module_main_conf(r, ngx_http_proxy_module);
 
     u->caches = &pmcf->caches;
@@ -1040,7 +1041,9 @@ ngx_http_proxy_handler(ngx_http_request_t *r)
         r->request_body_no_buffering = 1;
     }
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, ">>>>>>>>>>>>>>>> Calling read client request body method...");
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "<<<<<<<<<<<<<<<< Calling read client request body method finished.");
 
     if (rc >= NGX_HTTP_SPECIAL_RESPONSE) {
         return rc;
@@ -1171,6 +1174,7 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_proxy_module);
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Calling proxy create key (cache) method...");
     key = ngx_array_push(&r->cache->keys);
     if (key == NULL) {
         return NGX_ERROR;
@@ -1179,9 +1183,11 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
     if (plcf->cache_key.value.data) {
 
         if (ngx_http_complex_value(r, &plcf->cache_key, key) != NGX_OK) {
+            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Error. Call to complex value not NGX_OK. Finishing proxy create key (cache) method with NGX_ERROR");
             return NGX_ERROR;
         }
 
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Finishing proxy create key (cache) method: cache_key.value.data - ok, response with NGX_OK");
         return NGX_OK;
     }
 
@@ -1189,6 +1195,7 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
 
     key = ngx_array_push(&r->cache->keys);
     if (key == NULL) {
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "Error. Failed to push cache keys. Finishing proxy create key (cache) method with NGX_ERROR");
         return NGX_ERROR;
     }
 
@@ -1197,12 +1204,14 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
         *key = ctx->vars.uri;
         u->uri = ctx->vars.uri;
 
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Finishing proxy create key (cache) method with NGX_OK");
         return NGX_OK;
 
     } else if (ctx->vars.uri.len == 0 && r->valid_unparsed_uri) {
         *key = r->unparsed_uri;
         u->uri = r->unparsed_uri;
 
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Finishing proxy create key (cache) method with NGX_OK");
         return NGX_OK;
     }
 
@@ -1220,6 +1229,7 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
 
     p = ngx_pnalloc(r->pool, len);
     if (p == NULL) {
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "Error. Failed to allocate memory for pool. Finishing proxy create key (cache) method with NGX_ERROR");
         return NGX_ERROR;
     }
 
@@ -1246,6 +1256,7 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
     key->len = p - key->data;
     u->uri = *key;
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Finishing proxy create key (cache) method with NGX_OK");
     return NGX_OK;
 }
 
