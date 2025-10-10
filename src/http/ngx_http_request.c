@@ -3728,8 +3728,8 @@ ngx_http_close_request(ngx_http_request_t *r, ngx_int_t rc)
     r = r->main;
     c = r->connection;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http request count:%d blk:%d", r->count, r->blocked);
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, c->log, 0,
+                   "http request count:%d blk:%d, rc:%i", r->count, r->blocked, rc);
 
     if (r->count == 0) {
         ngx_log_error(NGX_LOG_ALERT, c->log, 0, "http request count is zero");
