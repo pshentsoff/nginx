@@ -48,6 +48,7 @@
 #define NGX_HAVE_SO_SNDLOWAT     1
 #endif
 
+#include <execinfo.h>
 
 #if !(NGX_WIN32)
 

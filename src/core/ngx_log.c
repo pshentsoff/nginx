@@ -750,3 +750,24 @@ ngx_log_memory_cleanup(void *data)
 }
 
 #endif
+
+void ngx_log_stacktrace(
+    ngx_uint_t level,
+    ngx_log_t *log,
+    ngx_err_t err,
+    const char *fmt
+) {
+    void *array[10];
+    size_t size, i;
+    char **strings;
+
+    size = backtrace(array, sizeof(array) / sizeof(*array));
+    strings = backtrace_symbols(array, size);
+
+    ngx_log_debug(level, log, err, fmt);
+    for (i = 0; i < size; i++) {
+        ngx_log_debug(level, log, 0, strings[i]);
+    }
+
+    free(strings);
+}

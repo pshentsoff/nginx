@@ -237,6 +237,7 @@ ngx_int_t ngx_log_redirect_stderr(ngx_cycle_t *cycle);
 ngx_log_t *ngx_log_get_file_log(ngx_log_t *head);
 char *ngx_log_set_log(ngx_conf_t *cf, ngx_log_t **head);
 
+void ngx_log_stacktrace(ngx_uint_t level, ngx_log_t *log, ngx_err_t err, const char *fmt);
 
 /*
  * ngx_write_stderr() cannot be implemented as macro, since
