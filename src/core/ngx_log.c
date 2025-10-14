@@ -765,8 +765,9 @@ void ngx_log_stacktrace(
     strings = backtrace_symbols(array, size);
 
     ngx_log_debug(level, log, err, fmt);
-    for (i = 0; i < size; i++) {
-        ngx_log_debug(level, log, 0, strings[i]);
+    for (i = 1; i < size; i++) {
+        //ngx_log_debug(level, log, 0, strings[i]);
+        fprintf(stderr, "%s\n", strings[i]);
     }
 
     free(strings);
