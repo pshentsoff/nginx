@@ -54,7 +54,8 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
     ngx_msec_int_t  diff;
 
     key = ngx_current_msec + timer;
-
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0, "<<<<<<<< TIMER >>>>>>> request to add event %d timer by %dms", ngx_event_ident(ev->data), timer);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_EVENT, ev->log, 0, "<<<<<<<< TIMER >>>>>>> request to add timer stacktrace");
     if (ev->timer_set) {
 
         /*
@@ -67,7 +68,7 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
 
         if (ngx_abs(diff) < NGX_TIMER_LAZY_DELAY) {
             ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                           "event timer: %d, old: %M, new: %M",
+                           "<<<<<<<< TIMER >>>>>>> event timer (less than NGX_TIMER_LAZY_DELAY - no add timer, return): %d, old: %M, new: %M",
                             ngx_event_ident(ev->data), ev->timer.key, key);
             return;
         }
@@ -78,7 +79,7 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
     ev->timer.key = key;
 
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                   "event timer add: %d: %M:%M",
+                   "<<<<<<<< TIMER >>>>>>> event timer add: %d: %M:%M",
                     ngx_event_ident(ev->data), timer, ev->timer.key);
 
     ngx_rbtree_insert(&ngx_event_timer_rbtree, &ev->timer);

@@ -76,7 +76,7 @@ ngx_event_expire_timers(void)
         ev = ngx_rbtree_data(node, ngx_event_t, timer);
 
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                       "event timer del: %d: %M",
+                       "event timer del: %d: %M, timer",
                        ngx_event_ident(ev->data), ev->timer.key);
 
         ngx_rbtree_delete(&ngx_event_timer_rbtree, &ev->timer);

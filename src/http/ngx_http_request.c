@@ -2437,6 +2437,7 @@ ngx_http_request_handler(ngx_event_t *ev)
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http run request: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, c->log, 0, "http run request stacktrace");
 
     if (c->close) {
         r->main->count++;
@@ -2529,6 +2530,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     ngx_log_debug5(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http finalize request: %i, \"%V?%V\" a:%d, c:%d",
                    rc, &r->uri, &r->args, r == c->data, r->main->count);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, c->log, 0, "http finalize request stacktrace:");
 
     if (rc == NGX_DONE) {
         ngx_http_finalize_connection(r);
@@ -2658,6 +2660,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                        "http wake parent request: \"%V?%V\"",
                        &pr->uri, &pr->args);
+        ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, c->log, 0, "http wake parent request stacktrace:");
 
         return;
     }
@@ -3730,7 +3733,7 @@ ngx_http_close_request(ngx_http_request_t *r, ngx_int_t rc)
 
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http request count:%d blk:%d, rc:%i", r->count, r->blocked, rc);
-
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, c->log, 0, "http request stacktrace");
     if (r->count == 0) {
         ngx_log_error(NGX_LOG_ALERT, c->log, 0, "http request count is zero");
     }

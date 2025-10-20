@@ -110,6 +110,7 @@ ngx_event_pipe_read_upstream(ngx_event_pipe_t *p)
     ngx_msec_t    delay;
     ngx_chain_t  *chain, *cl, *ln;
 
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, p->log, 0, "ngx_event_pipe_read_upstream() call stacktrace");
     if (p->upstream_eof || p->upstream_error || p->upstream_done
         || p->upstream == NULL)
     {
@@ -213,6 +214,7 @@ ngx_event_pipe_read_upstream(ngx_event_pipe_t *p)
                 if (limit <= 0) {
                     p->upstream->read->delayed = 1;
                     delay = (ngx_msec_t) (- limit * 1000 / p->limit_rate + 1);
+                    ngx_log_debug3(NGX_LOG_DEBUG_EVENT, p->log, 0, "ngx_event_pipe_read_upstream(): delay calculation: limit = %d, limit rate = %d, delay = %d", limit, p->limit_rate, delay);
                     ngx_add_timer(p->upstream->read, delay);
                     break;
                 }
@@ -380,6 +382,7 @@ ngx_event_pipe_read_upstream(ngx_event_pipe_t *p)
         }
 
         if (delay > 0) {
+            ngx_log_debug1(NGX_LOG_DEBUG_EVENT, p->log, 0, "ngx_event_pipe_read_upstream(): finally delay = %d", delay);
             p->upstream->read->delayed = 1;
             ngx_add_timer(p->upstream->read, delay);
             break;

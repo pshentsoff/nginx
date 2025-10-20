@@ -21,6 +21,7 @@ ngx_event_process_posted(ngx_cycle_t *cycle, ngx_queue_t *posted)
     ngx_queue_t  *q;
     ngx_event_t  *ev;
 
+    ngx_log_stacktrace(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "ngx_event_process_posted call stacktrace:");
     while (!ngx_queue_empty(posted)) {
 
         q = ngx_queue_head(posted);
@@ -31,6 +32,7 @@ ngx_event_process_posted(ngx_cycle_t *cycle, ngx_queue_t *posted)
 
         ngx_delete_posted_event(ev);
 
+        // what is the event here that lead to run inapropriet upsteams on PUT-GET?
         ev->handler(ev);
     }
 }

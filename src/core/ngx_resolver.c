@@ -4087,6 +4087,7 @@ ngx_resolver_set_timeout(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx)
     ctx->event->cancelable = ctx->cancelable;
     ctx->ident = -1;
 
+    ngx_log_debug2(NGX_LOG_DEBUG_CORE, ctx->event->log, 0, "ngx_resolver_set_timeout to event: %d by %dms", ctx->ident, ctx->timeout);
     ngx_add_timer(ctx->event, ctx->timeout);
 
     return NGX_OK;

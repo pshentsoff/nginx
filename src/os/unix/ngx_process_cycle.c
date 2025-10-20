@@ -1116,6 +1116,7 @@ ngx_cache_manager_process_cycle(ngx_cycle_t *cycle, void *data)
 
     ngx_setproctitle(ctx->name);
 
+    ngx_log_debug1(NGX_LOG_DEBUG_CORE, cycle->log, 0, "<<<<<<<< SET CACHE MANAGER PROCESS CYCLE DELAY >>>>>>>> delay: %d", ctx->delay);
     ngx_add_timer(&ev, ctx->delay);
 
     for ( ;; ) {

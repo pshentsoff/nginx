@@ -1042,6 +1042,7 @@ ngx_http_proxy_handler(ngx_http_request_t *r)
     }
 
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, ">>>>>>>>>>>>>>>> Calling read client request body method...");
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "Stack trace on http proxy that lead to real request:");
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "<<<<<<<<<<<<<<<< Calling read client request body method finished.");
 

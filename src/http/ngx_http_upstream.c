@@ -1314,7 +1314,8 @@ ngx_http_upstream_handler(ngx_event_t *ev)
     ngx_http_set_log_request(c->log, r);
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http upstream request: \"%V?%V\"", &r->uri, &r->args);
+                   "http upstream request handler: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, c->log, 0, "http upstream request handler stacktrace:");
 
     if (ev->delayed && ev->timedout) {
         ev->delayed = 0;
@@ -1360,16 +1361,20 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, ev->log, 0,
                    "http upstream check client, write event:%d, \"%V\"",
                    ev->write, &r->uri);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, ev->log, 0, "http upstream check client, write event stacktrace:");
 
     c = r->connection;
     u = r->upstream;
 
     if (c->error) {
+		ngx_log_debug1(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). Connection error %d processing", c->error);
         if ((ngx_event_flags & NGX_USE_LEVEL_EVENT) && ev->active) {
 
+			ngx_log_debug1(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). Connection error. Write event is %d", ev->write);
             event = ev->write ? NGX_WRITE_EVENT : NGX_READ_EVENT;
 
             if (ngx_del_event(ev, event, 0) != NGX_OK) {
+				ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). Connection error. Event deletion failed - calling request finalization and return");
                 ngx_http_upstream_finalize_request(r, u,
                                                NGX_HTTP_INTERNAL_SERVER_ERROR);
                 return;
@@ -1377,15 +1382,19 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
         }
 
         if (!u->cacheable) {
+			ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). Connection error. Upstream is not cacheable. Calling request finalization.");
             ngx_http_upstream_finalize_request(r, u,
                                                NGX_HTTP_CLIENT_CLOSED_REQUEST);
         }
 
+		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). Connection error. Returning.");
         return;
     }
 
 #if (NGX_HTTP_V2)
     if (r->stream) {
+		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_HTTP_V2. Stream. Returning.");
+
         return;
     }
 #endif
@@ -1398,6 +1407,7 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
                                                NGX_HTTP_CLIENT_CLOSED_REQUEST);
         }
 
+		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_HTTP_V3. quic. Returning.");
         return;
     }
 
@@ -1405,7 +1415,11 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
 
 #if (NGX_HAVE_KQUEUE)
 
+	ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_HAVE_KQUEUE.");
+
     if (ngx_event_flags & NGX_USE_KQUEUE_EVENT) {
+
+		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_USE_KQUEUE_EVENT.");
 
         if (!ev->pending_eof) {
             return;
@@ -1443,10 +1457,17 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
 
 #if (NGX_HAVE_EPOLLRDHUP)
 
+	ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_HAVE_EPOLLRDHUP.");
+
     if ((ngx_event_flags & NGX_USE_EPOLL_EVENT) && ngx_use_epoll_rdhup) {
         socklen_t  len;
 
+		ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_USE_EPOLL_EVENT.");
+
         if (!ev->pending_eof) {
+
+			ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_USE_EPOLL_EVENT. Pending EOF. Returning.");
+
             return;
         }
 
@@ -1468,6 +1489,7 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
         }
 
         if (err) {
+			ngx_log_debug0(NGX_LOG_DEBUG_HTTP, ev->log, 0, "ngx_http_upstream_check_broken_connection(). NGX_USE_EPOLL_EVENT. Set up event error flag.");
             ev->error = 1;
         }
 
@@ -4534,6 +4556,7 @@ ngx_http_upstream_dummy_handler(ngx_http_request_t *r, ngx_http_upstream_t *u)
 {
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "http upstream dummy handler");
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http upstream dummy handler stacktrace:");
 }
 
 
@@ -4700,6 +4723,7 @@ ngx_http_upstream_cleanup(void *data)
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "cleanup http upstream request: \"%V\"", &r->uri);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "cleanup http upstream request stacktrace:");
 
     ngx_http_upstream_finalize_request(r, r->upstream, NGX_DONE);
 }
@@ -4713,6 +4737,7 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "finalize http upstream request: %i", rc);
+    ngx_log_stacktrace(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "finalize http upstream request stacktrace:");
 
     if (u->cleanup == NULL) {
         /* the request was already finalized */
